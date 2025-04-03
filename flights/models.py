@@ -18,3 +18,15 @@ class Flight(models.Model):
     def __str__(self):
         return f"{self.airline.name} - {self.flight_number}"
 
+class Booking(models.Model):
+    CLASS_CHOICES = [
+        ("Economy", "Economy"),
+        ("Business", "Business"),
+    ]
+    passenger_name = models.CharField(max_length=100)
+    flight = models.ForeignKey(Flight, on_delete=models.CASCADE) # ForeignKey to Flight
+    seat_class = models.CharField(max_length=20, choices=CLASS_CHOICES)
+    number_of_seats = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f"{self.flight} - {self.passenger_name} - {self.number_of_seats} - {self.seat_class}"
