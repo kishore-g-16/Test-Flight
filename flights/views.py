@@ -102,7 +102,11 @@ class BookingListCreateView(APIView):
     def get(self, request):
         booking = Booking.objects.all()
         serializer = BookingSerializer(booking, many=True)
-        return Response(serializer.data)
+        if not booking.exists():
+            return Response({"error": "No bookings found!"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = BookingSerializer(booking, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
         serializer = BookingSerializer(data=request.data)
