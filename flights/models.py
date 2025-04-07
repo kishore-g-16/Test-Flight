@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 class Airline(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -15,8 +16,8 @@ class Flight(models.Model):
                      ("Business", "Business")
                      ])
 
-    departure_time = models.DateTimeField()  # New field for departure time
-    arrival_time = models.DateTimeField()  # New field for arrival time
+    departure_time = models.DateTimeField(default=timezone.now)  # New field for departure time
+    arrival_time = models.DateTimeField(default=timezone.now)  # New field for arrival time
 
     def __str__(self):
         departure_time_str = self.departure_time.strftime('%Y-%m-%d %H:%M') \
@@ -33,7 +34,7 @@ class Booking(models.Model):
     flight = models.ForeignKey(Flight, on_delete=models.CASCADE) # ForeignKey to Flight
     seat_class = models.CharField(max_length=20, choices=CLASS_CHOICES)
     number_of_seats = models.PositiveIntegerField()
-    booking_time = models.DateTimeField()  # New field for selecting booking time
+    booking_time = models.DateTimeField(default=timezone.now)  # New field for selecting booking time
 
     def __str__(self):
         booking_time_str = self.booking_time.strftime('%Y-%m-%d %H:%M') if self.booking_time else "No Booking Time"
