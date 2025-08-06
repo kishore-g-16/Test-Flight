@@ -1,9 +1,10 @@
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.views import APIView
 from django.utils.timezone import now
-from .models import Airline, Flight, Booking
-from .serializers import AirlineSerializer, FlightSerializer, BookingSerializer
+from django.shortcuts import get_object_or_404
+from .models import Airline, Flight, Booking , UserDetails
+from .serializers import AirlineSerializer, FlightSerializer, BookingSerializer , UserDetailsSerializer
 
 
 # API to list and create airlines
@@ -166,3 +167,31 @@ class BookingCreateCancelView(APIView):
 
         booking.delete()
         return Response({"message": "Booking canceled successfully!"}, status=status.HTTP_204_NO_CONTENT)
+
+class UserDetailsView(APIView):
+
+    def get(self, request, username=None):
+        if username:
+            user = get_object_or_404(UserDetails, username=username)
+            serializer = UserDetailsSerializer(user)
+            return Response(serializer.data)
+        else:
+            users = UserDetails.objects.all()
+            serializer = UserDetailsSerializer(users, many=True)
+            return Response(serializer.data)
+
+    def post(self, request):
+        serializer = UserDetailsSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, username):
+        user = get_object_or_404(UserDetails, username=username)
+        serializer = UserDetailsSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
