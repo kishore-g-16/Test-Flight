@@ -15,5 +15,4 @@ class BookingAdmin(admin.ModelAdmin):
 
 @admin.register(UserDetails)
 class UserDetailsAdmin(admin.ModelAdmin):
-    list_display = ('id', 'username', 'full_name', 'gender', 'date_of_birth', 'mobile_number', 'email', 'is_special_person', 'is_covid_vaccinated')
-    readonly_fields = ('username',)
+    list_display = ('id', 'username', 'first_name', 'last_name', 'email')

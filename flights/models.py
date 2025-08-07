@@ -42,15 +42,17 @@ class Booking(models.Model):
         booking_time_str = self.booking_time.strftime('%Y-%m-%d %H:%M') if self.booking_time else "No Booking Time"
         return f"{self.flight} - {self.passenger_name} - {self.number_of_seats} - {self.seat_class} - {booking_time_str}"
 
+
 class UserDetails(models.Model):
 
-    # Auto Generated Username
+    # Auto Generateed User Name
 
     username = models.CharField(max_length=64, unique=True, blank=True)
 
     # Primary Fields
+    first_name = models.CharField(max_length=100, null=True, blank=True)
+    last_name = models.CharField(max_length=100 , null=True, blank=True)
 
-    full_name = models.CharField(max_length=255)
     GENDER_CHOICES = [
         ('M', 'Male'),
         ('F', 'Female'),
@@ -65,15 +67,12 @@ class UserDetails(models.Model):
     email = models.EmailField()
     emergency_contact = models.CharField(max_length=15, blank=True, null=True)
 
-    # Boolean Fields
-
     is_special_person = models.BooleanField(default=False)
     is_covid_vaccinated = models.BooleanField(default=False)
 
-
     def save(self, *args, **kwargs):
         if not self.username:
-            # Generate unique username, e.g., kishore19900101 or random UUID-based
+            # Use first name + birthdate to create base username
             base_username = f"{self.first_name.lower()}{self.date_of_birth.strftime('%Y%m%d')}"
             original = base_username
             count = 1
@@ -84,4 +83,4 @@ class UserDetails(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.full_name} ({self.username})"
+        return f"{self.first_name} {self.last_name} ({self.username})"
