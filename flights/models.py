@@ -42,12 +42,22 @@ class Booking(models.Model):
         booking_time_str = self.booking_time.strftime('%Y-%m-%d %H:%M') if self.booking_time else "No Booking Time"
         return f"{self.flight} - {self.passenger_name} - {self.number_of_seats} - {self.seat_class} - {booking_time_str}"
 
+
 class UserDetails(models.Model):
+
+    # Auto Generateed User Name
+
     username = models.CharField(max_length=64, unique=True, blank=True)
 
-    # Other fields...
-    full_name = models.CharField(max_length=255)
-    GENDER_CHOICES = [('M', 'Male'), ('F', 'Female'), ('O', 'Other')]
+    # Primary Fields
+    first_name = models.CharField(max_length=100, null=True, blank=True)
+    last_name = models.CharField(max_length=100 , null=True, blank=True)
+
+    GENDER_CHOICES = [
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('O', 'Other')
+    ]
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     date_of_birth = models.DateField()
     nationality = models.CharField(max_length=100)
@@ -62,15 +72,15 @@ class UserDetails(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.username:
-            self.username = self.generate_encrypted_username()
+            # Use first name + birthdate to create base username
+            base_username = f"{self.first_name.lower()}{self.date_of_birth.strftime('%Y%m%d')}"
+            original = base_username
+            count = 1
+            while UserDetails.objects.filter(username=base_username).exists():
+                base_username = f"{original}_{count}"
+                count += 1
+            self.username = base_username
         super().save(*args, **kwargs)
 
-    def generate_encrypted_username(self):
-        # Generate UUID and hash it
-        random_uuid = uuid.uuid4().hex  # 32-character hex
-        hash_object = hashlib.sha256(random_uuid.encode())
-        encrypted_id = hash_object.hexdigest()  # 64 characters
-        return encrypted_id[:20]  # Use first 20 characters for username
-
     def __str__(self):
-        return self.username
+        return f"{self.first_name} {self.last_name} ({self.username})"
