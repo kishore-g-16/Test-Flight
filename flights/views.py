@@ -104,6 +104,7 @@ class FlightDetailView(APIView):
 
 
 # API to list and create bookings with a booking time
+
 class BookingListCreateView(APIView):
     def get(self, request):
         bookings = Booking.objects.all()

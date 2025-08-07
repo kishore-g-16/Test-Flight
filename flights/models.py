@@ -61,10 +61,10 @@ class UserDetails(models.Model):
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     date_of_birth = models.DateField()
     nationality = models.CharField(max_length=100)
-    passport_number = models.CharField(max_length=50, blank=True, null=True)
+    passport_number = models.CharField(max_length=50, blank=True, unique=True , null=True)
     id_proof_details = models.TextField()
-    mobile_number = models.CharField(max_length=15)
-    email = models.EmailField()
+    mobile_number = models.CharField(max_length=15 , unique=True)
+    email = models.EmailField(unique=True)
     emergency_contact = models.CharField(max_length=15, blank=True, null=True)
 
     is_special_person = models.BooleanField(default=False)
