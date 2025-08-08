@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from django.conf import settings  # or from your custom user model location
 import hashlib
 import uuid
 
@@ -33,6 +34,7 @@ class Booking(models.Model):
         ("Business", "Business"),
     ]
     passenger_name = models.CharField(max_length=100)
+    user = models.ForeignKey('UserDetails', on_delete=models.CASCADE)
     flight = models.ForeignKey(Flight, on_delete=models.CASCADE) # ForeignKey to Flight
     seat_class = models.CharField(max_length=20, choices=CLASS_CHOICES)
     number_of_seats = models.PositiveIntegerField()
@@ -64,7 +66,7 @@ class UserDetails(models.Model):
     passport_number = models.CharField(max_length=50, blank=True, unique=True , null=True)
     id_proof_details = models.TextField()
     mobile_number = models.CharField(max_length=15 , unique=True)
-    email = models.EmailField(unique=True)
+    email = models.EmailField()
     emergency_contact = models.CharField(max_length=15, blank=True, null=True)
 
     is_special_person = models.BooleanField(default=False)

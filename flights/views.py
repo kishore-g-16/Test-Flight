@@ -58,7 +58,12 @@ class AirlineDetailView(APIView):
 # API to list and create flights with timing information
 class FlightListCreateView(APIView):
     def get(self, request):
-        flights = Flight.objects.all()
+        airline_id = request.query_params.get('airline_id')
+        if airline_id:
+            flights = Flight.objects.filter(airline_id=airline_id)
+        else:
+            flights = Flight.objects.all()
+
         serializer = FlightSerializer(flights, many=True)
         return Response(serializer.data)
 
@@ -106,68 +111,41 @@ class FlightDetailView(APIView):
 # API to list and create bookings with a booking time
 
 class BookingListCreateView(APIView):
+
+    # To List All Bookings
+
     def get(self, request):
         bookings = Booking.objects.all()
-        if not bookings.exists():
-            return Response({"error": "No bookings found!"}, status=status.HTTP_404_NOT_FOUND)
-
         serializer = BookingSerializer(bookings, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data)
 
     def post(self, request):
         flight_id = request.data.get("flight")
-        flight = Flight.objects.filter(id=flight_id).first()
+        user_id = request.data.get("user")
 
+        # Validate flight
+        flight = Flight.objects.filter(id=flight_id).first()
         if not flight:
             return Response({"error": "Flight not found!"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Validate user
+        user = UserDetails.objects.filter(id=user_id).first()
+        if not user:
+            return Response({"error": "User not found!"}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = BookingSerializer(data=request.data)
         if serializer.is_valid():
             booking_time = serializer.validated_data.get("booking_time", now())
 
-            if booking_time < flight.departure_time:
-                serializer.save(booking_time=booking_time)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            else:
-                return Response({"error": "Booking time must be before departure time"}, status=status.HTTP_400_BAD_REQUEST)
+            # Ensure booking time is before departure
+            if booking_time >= flight.departure_time:
+                return Response({"error": "Booking time must be before departure time."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Save booking with validated user and flight
+            serializer.save(user=user, flight=flight, booking_time=booking_time)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-# API to create and cancel a booking
-class BookingCreateCancelView(APIView):
-    def post(self, request):
-        """Create and save a new booking"""
-        flight_id = request.data.get("flight")
-        flight = Flight.objects.filter(id=flight_id).first()
-
-        if not flight:
-            return Response({"error": "Flight not found!"}, status=status.HTTP_404_NOT_FOUND)
-
-        serializer = BookingSerializer(data=request.data)
-        if serializer.is_valid():
-            booking_time = serializer.validated_data.get("booking_time", now())
-
-            if booking_time < flight.departure_time:
-                serializer.save(booking_time=booking_time)
-                return Response(
-                    {"message": "Booking created successfully!", "data": serializer.data},
-                    status=status.HTTP_201_CREATED,
-                )
-            else:
-                return Response({"error": "Booking time must be before departure time"}, status=status.HTTP_400_BAD_REQUEST)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, booking_id):
-        """Cancel a booking by deleting it"""
-        booking = Booking.objects.filter(id=booking_id).first()
-
-        if not booking:
-            return Response({"error": "Booking not found!"}, status=status.HTTP_404_NOT_FOUND)
-
-        booking.delete()
-        return Response({"message": "Booking canceled successfully!"}, status=status.HTTP_204_NO_CONTENT)
 
 class UserDetailsView(APIView):
 
