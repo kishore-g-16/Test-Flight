@@ -11,7 +11,11 @@ class FlightAdmin(admin.ModelAdmin):
 
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
-    list_display = ('id', 'passenger_name', 'flight', 'seat_class', 'number_of_seats', 'booking_time')
+    list_display = ('id', 'get_username', 'flight')
+    
+    def get_username(self, obj):
+        return obj.user.username
+    get_username.short_description = 'Username'  # Sets column header in admin
 
 @admin.register(UserDetails)
 class UserDetailsAdmin(admin.ModelAdmin):

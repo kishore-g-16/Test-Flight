@@ -71,16 +71,14 @@ class UserDetails(models.Model):
     is_special_person = models.BooleanField(default=False)
     is_covid_vaccinated = models.BooleanField(default=False)
 
+    # Generates Unique Username on Save
+
     def save(self, *args, **kwargs):
         if not self.username:
-            # Use first name + birthdate to create base username
-            base_username = f"{self.first_name.lower()}{self.date_of_birth.strftime('%Y%m%d')}"
-            original = base_username
-            count = 1
-            while UserDetails.objects.filter(username=base_username).exists():
-                base_username = f"{original}_{count}"
-                count += 1
-            self.username = base_username
+            # Generate unique encrypted username
+            unique_str = str(uuid.uuid4())
+            encrypted = hashlib.sha256(unique_str.encode()).hexdigest()
+            self.username = encrypted[:12]  # Keep short but unique
         super().save(*args, **kwargs)
 
     def __str__(self):

@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework import generics
 from django.utils.timezone import now
 from django.shortcuts import get_object_or_404
 from .models import Airline, Flight, Booking , UserDetails
@@ -106,6 +107,15 @@ class FlightDetailView(APIView):
             return Response({"error": "Not found"}, status=status.HTTP_404_NOT_FOUND)
         flight.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class FlightsByAirlineView(generics.ListAPIView):
+    serializer_class = FlightSerializer
+
+    def get_queryset(self):
+        airline_id = self.request.query_params.get('airline_id')
+        if airline_id:
+            return Flight.objects.filter(airline__id=airline_id)
+        return Flight.objects.none()
 
 
 # API to list and create bookings with a booking time
