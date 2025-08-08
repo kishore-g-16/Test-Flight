@@ -27,22 +27,21 @@ class Flight(models.Model):
             if self.departure_time else "No Departure Time"
         return f"{self.airline.name} - {self.flight_number} ({departure_time_str})"
 
-
 class Booking(models.Model):
     CLASS_CHOICES = [
         ("Economy", "Economy"),
         ("Business", "Business"),
     ]
-    passenger_name = models.CharField(max_length=100)
     user = models.ForeignKey('UserDetails', on_delete=models.CASCADE)
-    flight = models.ForeignKey(Flight, on_delete=models.CASCADE) # ForeignKey to Flight
+    flight = models.ForeignKey(Flight, on_delete=models.CASCADE)
     seat_class = models.CharField(max_length=20, choices=CLASS_CHOICES)
     number_of_seats = models.PositiveIntegerField()
-    booking_time = models.DateTimeField(default=timezone.now)  # New field for selecting booking time
+    booking_time = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
+        passenger_name = f"{self.user.first_name} {self.user.last_name}"
         booking_time_str = self.booking_time.strftime('%Y-%m-%d %H:%M') if self.booking_time else "No Booking Time"
-        return f"{self.flight} - {self.passenger_name} - {self.number_of_seats} - {self.seat_class} - {booking_time_str}"
+        return f"{self.flight} - {passenger_name} - {self.number_of_seats} - {self.seat_class} - {booking_time_str}"
 
 
 class UserDetails(models.Model):

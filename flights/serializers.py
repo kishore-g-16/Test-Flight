@@ -12,10 +12,14 @@ class FlightSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class BookingSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(queryset=UserDetails.objects.all())
+
     class Meta:
         model = Booking
-        fields = '__all__'
-        read_only_fields = ('user', 'flight', 'booking_time')
+        fields = ['id', 'user', 'flight', 'seat_class', 'number_of_seats', 'booking_time']
+
+    def create(self, validated_data):
+        return Booking.objects.create(**validated_data)
 
 
 class UserDetailsSerializer(serializers.ModelSerializer):
